@@ -1,46 +1,152 @@
-var navigationBar = document.querySelector("#navigation-bar");
+var question = document.getElementById("question");
+var choices = Array.from(document.getElementsByClassName("choice-text"));
+var startQuizButton = document.getElementById("start-quiz");
+
 var questionSpace = document.querySelector("#question-space");
-var timer = document.querySelector("#timer");
-var startQuizButton = document.querySelector("#start-quiz");
 
-console.log(navigationBar.innerHTML);
-console.log(questionSpace.innerHTML);
-console.log(startQuizButton.innerHTML);
+let currentQuestion = {};
+let acceptingAnswers = false;
+let score = 0;
+let questionCounter = 0;
+let availableQuestions = [];
 
-// I'm putting the question choices as an array so its easy to fill in the HTML lower down with the DOM
-var questionArray = [
-  "<div class='row'> <div class='col-6 offset-3 text-center'> <h2>Question 1</h2> </div> </div> <div class='row'> <div class='col-6 offset-3 text-left'> <button type='button' class='btn btn-submit' id='answer1-1'> Answer 1 </button> </div> </div> <div class='row'> <div class='col-6 offset-3 text-left'> <button type='button' class='btn btn-submit' id='answer1-2'> Answer 2 </button> </div> </div> <div class='row'> <div class='col-6 offset-3 text-left'> <button type='button' class='btn btn-submit' id='answer1-3'> Answer 3 </button> </div> </div> <div class='row'> <div class='col-6 offset-3 text-left'> <button type='button' class='btn btn-submit' id='answer1-4'> Answer 4 </button> </div> </div> </div>",
+// Question Arrays
 
-  "<h2 id='Q2' class='col-6 offset-3 text-left'>Q2</h2> <div class='row'><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A1'>First Answer</button></div></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A2'>Second Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A3'>Third Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A4'>Fourth Answer</button></div>",
-
-  "<h2 id='Q3' class='col-6 offset-3 text-left'>Q3</h2> <div class='row'><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A1'>First Answer</button></div></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A2'>Second Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A3'>Third Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A4'>Fourth Answer</button></div>",
-
-  "<h2 id='Q4' class='col-6 offset-3 text-left'>Q4</h2> <div class='row'><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A1'>First Answer</button></div></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A2'>Second Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A3'>Third Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A4'>Fourth Answer</button></div>",
-
-  "<h2 id='Q5' class='col-6 offset-3 text-left'>Q5</h2> <div class='row'><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A1'>First Answer</button></div></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id='A2'>Second Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A3'>Third Answer</button></div><div class='col-6 offset-3 text-left'><button type='button' class='btn btn-submit' id=‘A4'>Fourth Answer</button></div>",
+let questions = [
+  {
+    question: "Commonly used data types DO NOT include:",
+    choice1: "1. Strings",
+    choice2: "2. Booleans",
+    choice3: "3. Alerts",
+    choice4: "4. Numbers",
+    answer: 3,
+  },
+  {
+    question:
+      "The condition in an if / else statement is enclosed within (blank).",
+    choice1: "1. Quotes",
+    choice2: "2. Curly Brackets",
+    choice3: "3. Parentheses",
+    choice4: "4. Square Brackets",
+    answer: 2,
+  },
+  {
+    question: "Arrays in Javascript can be used to store:",
+    choice1: "1. Numbers and strings",
+    choice2: "2. Other arrays",
+    choice3: "3. Booleans",
+    choice4: "4. All of the above",
+    answer: 4,
+  },
+  {
+    question:
+      "String values must be enclosed within (blank) when being assigned to variables.",
+    choice1: "1. Commas",
+    choice2: "2. Curly Brackets",
+    choice3: "3. Quotes",
+    choice4: "4. Parentheses",
+    answer: 4,
+  },
+  {
+    question:
+      "A very useful tool used during development and debugging for printing content to the debugger is:",
+    choice1: "1. JavaScript",
+    choice2: "2. Terminal/bash",
+    choice3: "3. For Loops",
+    choice4: "4. console.log()",
+    answer: 4,
+  },
 ];
 
-var interval;
+var correctBonus = 10;
+var maxQuestions = 4;
 
-startQuizButton.addEventListener("click", startQuizFunction);
+startQuizButton.addEventListener("click", startGame);
 
-
-function startQuizFunction() {
+function startGame(event) {
+  event.preventDefault();
+  getNewQuestion();
+  deleteHomePage();
 
   // Timer
   var timeleft = 75;
-  var gameTimer = setInterval(function(){
-    if(timeleft <= 0){
+  var gameTimer = setInterval(function () {
+    if (timeleft <= 0) {
       // This will be used to show game over once possible
       clearInterval(gameTimer);
       timer.innerHTML = "Finished";
     } else {
-     timer.innerHTML = timeleft;
+      timer.innerHTML = timeleft;
     }
     timeleft -= 1;
-  }, 1000)
-  
-// First question
-  questionSpace.innerHTML = questionArray[0];
+  }, 1000);
+}
 
-    };
+// Removes the homepage content
+function deleteHomePage() {
+  var homepage = document.getElementById("homepage");
+  homepage.remove();
+}
+
+function getNewQuestion() {
+    // if (availableQuestions.length == 0){
+    //     // go to the end page - will use the same method as with the buttons to fill in the info I think
+    //     alert("you're at the end. Something else should happen. If it hasn't yet, this game isn't ready.")
+    // };
+
+  questionCounter = 0;
+  score = 0;
+  availableQuestions = [...questions];
+  console.log(availableQuestions);
+
+  // Find  a new question
+  questionCounter++;
+  var questionIndex = Math.floor(Math.random() * availableQuestions.length);
+  currentQuestion = availableQuestions[questionIndex];
+  question.innerText = currentQuestion.question;
+
+  // Add the new quesiton info into the HTML
+  choices.forEach((choice) => {
+    var number = choice.dataset["number"];
+    choice.innerText = currentQuestion["choice" + number];
+  });
+
+  availableQuestions.splice(questionIndex, 1);
+  console.log(availableQuestions);
+  acceptingAnswers = true;
+};
+
+choices.forEach(choice => {
+    choice.addEventListener("click", e => {
+        if (!acceptingAnswers) return;
+        acceptingAnswers = false;
+        var selectedChoice = e.target;
+        var selectedAnswer = selectedChoice.;
+
+        if (selectedAnswer === currentQuestion.answer) 
+        {
+            feedback.innerHTML = 'You did good'
+        } 
+        else if (selectedAnswer !== currentQuestion.answer) 
+        {
+            feedback.innerHTML = 'You fudged up'
+        }
+
+        // giveFeedback ();
+
+        // function giveFeedback() {
+        //     if (feedbackToApply === 'incorrect') 
+        //     {
+        //         feedback.innerHTML = 'You fudged up'
+        //     } 
+        //     else (feedbackToApply === 'correct') 
+        //     {
+        //         feedback.innerHTML = 'You did good'
+        //     }
+        // };
+        
+
+
+        getNewQuestion();
+    });
+});
