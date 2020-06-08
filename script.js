@@ -123,13 +123,13 @@ choices.forEach(choice => {
         var selectedChoice = e.target;
         var selectedAnswer = selectedChoice.dataset["number"];
 
-        if (selectedAnswer === currentQuestion.answer) 
-        {
-            feedback.innerHTML = 'You did good'
-        } 
-        else if (selectedAnswer !== currentQuestion.answer) 
+        if (selectedAnswer == currentQuestion.answer) 
         {
             feedback.innerHTML = 'You fudged up'
+        } 
+        else (selectedAnswer !== currentQuestion.answer) 
+        {
+            feedback.innerHTML = 'You did good'
         }
 
         // giveFeedback ();
