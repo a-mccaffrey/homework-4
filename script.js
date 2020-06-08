@@ -121,7 +121,7 @@ choices.forEach(choice => {
         if (!acceptingAnswers) return;
         acceptingAnswers = false;
         var selectedChoice = e.target;
-        var selectedAnswer = selectedChoice.;
+        var selectedAnswer = selectedChoice.dataset["number"];
 
         if (selectedAnswer === currentQuestion.answer) 
         {
