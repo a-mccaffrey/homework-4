@@ -89,10 +89,10 @@ function deleteHomePage() {
 }
 
 function getNewQuestion() {
-    // if (availableQuestions.length == 0){
-    //     // go to the end page - will use the same method as with the buttons to fill in the info I think
-    //     alert("you're at the end. Something else should happen. If it hasn't yet, this game isn't ready.")
-    // };
+  // if (availableQuestions.length == 0){
+  //     // go to the end page - will use the same method as with the buttons to fill in the info I think
+  //     alert("you're at the end. Something else should happen. If it hasn't yet, this game isn't ready.")
+  // };
 
   questionCounter = 0;
   score = 0;
@@ -114,39 +114,36 @@ function getNewQuestion() {
   availableQuestions.splice(questionIndex, 1);
   console.log(availableQuestions);
   acceptingAnswers = true;
-};
+}
 
-choices.forEach(choice => {
-    choice.addEventListener("click", e => {
-        if (!acceptingAnswers) return;
-        acceptingAnswers = false;
-        var selectedChoice = e.target;
-        var selectedAnswer = selectedChoice.dataset["number"];
+for (let i = 0; i < 4; step++) {
+  
+choices.forEach((choice) => {
+  choice.addEventListener("click", (event) => {
+    if (!acceptingAnswers) return;
 
-        if (selectedAnswer == currentQuestion.answer) 
-        {
-            feedback.innerHTML = 'You fudged up'
-        } 
-        else (selectedAnswer !== currentQuestion.answer) 
-        {
-            feedback.innerHTML = 'You did good'
-        }
+    acceptingAnswers = false;
+    var selectedChoice = event.target;
+    var selectedAnswer = selectedChoice.dataset["number"];
 
-        // giveFeedback ();
+    console.log(selectedAnswer == currentQuestion.answer);
 
-        // function giveFeedback() {
-        //     if (feedbackToApply === 'incorrect') 
-        //     {
-        //         feedback.innerHTML = 'You fudged up'
-        //     } 
-        //     else (feedbackToApply === 'correct') 
-        //     {
-        //         feedback.innerHTML = 'You did good'
-        //     }
-        // };
-        
+   // Give feedback if question answer is right or wrong
+    if (selectedAnswer == currentQuestion.answer) {
+      feedback.innerHTML = "<hr/> <div class='container'> <div class='row'> <div class='col-6 offset-3 text-center'> <p> You fudged up! </p> </div> </div> </div>";
+      setTimeout(function() {
+        feedback.innerHTML = "";
+      }, (2 * 1000));
+    }
+    else {
+      feedback.innerHTML = "<hr/> <div class='container'> <div class='row'> <div class='col-6 offset-3 text-center'> <p> You fudged up! </p> </div> </div> </div>";
+      setTimeout(function() {
+        feedback.innerHTML = "";
+      }, (2 * 1000));
+    };
 
-
-        getNewQuestion();
-    });
+    getNewQuestion();
+  });
+  enterInitials();
 });
+};
