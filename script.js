@@ -2,7 +2,10 @@ var question = document.getElementById("question");
 var choices = Array.from(document.getElementsByClassName("choice-text"));
 var startQuizButton = document.getElementById("start-quiz");
 
-var seeHighScores = [document.getElementById("home-highscores"), document.getElementById("gameover-highscores")];
+var seeHighScores = [
+  document.getElementById("home-highscores"),
+  document.getElementById("gameover-highscores"),
+];
 var inputUsername = document.getElementById("input-username");
 
 var questionSpace = document.querySelector("#question-space");
@@ -69,6 +72,10 @@ var result = "correct";
 var correctBonus = 10;
 var maxQuestions = 4;
 
+// Go back to the beginning
+function reloadHomePage() {
+  window.location.reload();
+}
 startQuizButton.addEventListener("click", startGame);
 
 function startGame(event) {
@@ -76,91 +83,94 @@ function startGame(event) {
   getNewQuestion();
   deleteHomePage();
 
-// Removes the homepage content
-function deleteHomePage() {
-  var homepage = document.getElementById("homepage");
-  homepage.remove();
-}
+  // Removes the homepage content
+  function deleteHomePage() {
+    var homepage = document.getElementById("homepage");
+    homepage.remove();
+  }
 
-function getNewQuestion() {
-  // if (availableQuestions.length == 0){
-  //     // go to the end page - will use the same method as with the buttons to fill in the info I think
-  //     alert("you're at the end. Something else should happen. If it hasn't yet, this game isn't ready.")
-  // };
+  function getNewQuestion() {
+    // if (availableQuestions.length == 0){
+    //     // go to the end page - will use the same method as with the buttons to fill in the info I think
+    //     alert("you're at the end. Something else should happen. If it hasn't yet, this game isn't ready.")
+    // };
 
-  questionCounter = 0;
-  availableQuestions = [...questions];
-  console.log(availableQuestions);
+    questionCounter = 0;
+    availableQuestions = [...questions];
+    console.log(availableQuestions);
 
-  // Find  a new question
-  questionCounter++;
-  var questionIndex = Math.floor(Math.random() * availableQuestions.length);
-  currentQuestion = availableQuestions[questionIndex];
-  question.innerText = currentQuestion.question;
+    // Find  a new question
+    questionCounter++;
+    var questionIndex = Math.floor(Math.random() * availableQuestions.length);
+    currentQuestion = availableQuestions[questionIndex];
+    question.innerText = currentQuestion.question;
 
-  // Add the new quesiton info into the HTML
+    // Add the new quesiton info into the HTML
+    choices.forEach((choice) => {
+      var number = choice.dataset["number"];
+      choice.innerText = currentQuestion["choice" + number];
+    });
+
+    availableQuestions.splice(questionIndex, 1);
+    console.log(availableQuestions);
+    acceptingAnswers = true;
+  }
+
+  // Make it listen to all the buttons
   choices.forEach((choice) => {
-    var number = choice.dataset["number"];
-    choice.innerText = currentQuestion["choice" + number];
-  });
+    choice.addEventListener("click", (event) => {
+      event.preventDefault;
+      if (!acceptingAnswers) return;
 
-  availableQuestions.splice(questionIndex, 1);
-  console.log(availableQuestions);
-  acceptingAnswers = true;
-}
-  
-// Make it listen to all the buttons
-choices.forEach((choice) => {
-  choice.addEventListener("click", (event) => {
-    event.preventDefault;
-    if (!acceptingAnswers) return;
+      acceptingAnswers = false;
+      var selectedChoice = event.target;
+      var selectedAnswer = selectedChoice.dataset["number"];
 
-    acceptingAnswers = false;
-    var selectedChoice = event.target;
-    var selectedAnswer = selectedChoice.dataset["number"];
+      console.log(selectedAnswer == currentQuestion.answer);
 
-    console.log(selectedAnswer == currentQuestion.answer);
-
-   // Give feedback if question answer is right or wrong
-    if (selectedAnswer == parseInt(currentQuestion.answer)) {
-      questionsAsked++;
-      score++;
-      feedback.innerHTML = "<hr/> <div class='container'> <div class='row'> <div class='col-6 offset-3 text-center'> <p> You fudged up! </p> </div> </div> </div>";
-      setTimeout(function() {
-        feedback.innerHTML = "";
-      }, (2 * 1000));
-    }
-    else {
-      questionsAsked++;
-      score--;
-      timeleft -= 5;
-      feedback.innerHTML = "<hr/> <div class='container'> <div class='row'> <div class='col-6 offset-3 text-center'> <p> You fudged up! </p> </div> </div> </div>";
-      setTimeout(function() {
-        feedback.innerHTML = "";
-      }, (2 * 1000));
-    };
-// Add to the questiones asked so we can go to the end
-    if (questionsAsked <= 3){
-      getNewQuestion();}
-      else {endGame()
+      // Give feedback if question answer is right or wrong
+      var feedback = document.getElementById("feedback");
+      if (selectedAnswer == currentQuestion.answer) {
+        questionsAsked++;
+        score++;
+        feedback.innerHTML =
+          "<hr/> <div class='container'> <div class='row'> <div class='col-6 offset-3 text-center'> <p> You fudged up! </p> </div> </div> </div>";
+        setTimeout(function () {
+          feedback.innerHTML = "";
+        }, 2 * 1000);
+      } else {
+        questionsAsked++;
+        score--;
+        timeLeft -= 5;
+        feedback.innerHTML =
+          "<hr/> <div class='container'> <div class='row'> <div class='col-6 offset-3 text-center'> <p> You fudged up! </p> </div> </div> </div>";
+        setTimeout(function () {
+          feedback.innerHTML = "";
+        }, 2 * 1000);
       }
+      // Add to the questiones asked so we can go to the end
+      if (questionsAsked <= 3) {
+        getNewQuestion();
+      } else {
+        endGame();
+      }
+    });
   });
-});
 }
 
-  // Timer
-  var timeleft = 50;
- setInterval(function () {
-    if (timeleft <= 0) {
-      endGame();
-      timer.innerHTML = "Finished";  
-    } else {
-      timer.innerHTML = timeleft;
-    }
-    timeleft -= 1;
-  }, 1000);
+// Timer
+var timeLeft = 50;
+setInterval(function () {
+  if (timeLeft <= 0) {
+    endGame();
+    timer.innerHTML = "Finished";
+  } else {
+    timer.innerHTML = timeLeft;
+  }
+  timeLeft -= 1;
+}, 1000);
 
-  // get rid of the game when we're done
+// get rid of the game when we're done
 var gameArea = document.getElementById("game");
 var endGame = () => {
   gameArea.innerHTML = "";
@@ -170,9 +180,44 @@ var endGame = () => {
 // Show final score and forms
 var initialPlace = document.getElementById("initial-place");
 var message = document.getElementById("message");
+var yourFinalScore = document.getElementById("yourfinal-score");
 var finalScore = document.getElementById("final-score");
+
 function displayForm() {
-  initialPlace.innerHTML = "  <div class='col-7 offset-3 text-center'> <form class='form-inline'> <div class='form-group mb-2'> <label id='input-a enter-intials'>Enter your Initials</label> </div> <div class='form-group mx-sm-3 mb-2'> <label for='input-initials' class='sr-only'> </label> <input type='password' class='form-control' id='inputPassword2' placeholder=''></input> <button type='submit' class='btn btn-primary mb-2'>Submit</button> </form> </div> ";
+  initialPlace.innerHTML =
+    "  <div class='col-7 offset-3 text-center'> <form class='form-inline'> <div class='form-group mb-2'> <label id='input-a enter-intials'>Enter your Initials</label> </div> <div class='form-group mx-sm-3 mb-2'> <label for='input-initials' class='sr-only'> </label> <input type='username' class='form-control' id='input-intials' placeholder=''></input> <button type='submit' class='btn btn-primary mb-2' id='saveScoreBtn' action='submit'>Submit</button> </form> </div> ";
   message.innerText = "All done!";
-  finalScore.innerText = "Your final score is " + score;
-};
+  yourFinalScore.innerText = "Your final score is ";
+  finalScore.innerText = parseInt(score);
+  timeLeft = 0;
+
+  // Everything under here isn't checked
+
+  var highScores = JSON.parse(localStorage.getItem("highScores")) || [];
+  var username = document.getElementById("username");
+  var saveScoreBtn = document.getElementById("saveScoreBtn");
+
+  saveScoreBtn.addEventListener("submit", function(event) {
+    event.preventDefault();
+    localStorage.setItem("value", JSON.stringify(score));
+    localStorage.setItem("name", JSON.stringify(username));
+
+    var mostRecentScore = {
+      score: Math.floor(Math.random() * 100),
+      name: username.value,
+    };
+    // highScores.push(mostRecentScore);
+    // localStorage.getItem(score);
+
+  });
+}
+
+// formElement.addEventListener("submit", function(e){
+//   localStorage.setItem("name", inputElement.value);
+//   h1Element.textContent = inputElement.name;
+//   e.preventDefault();
+// })
+
+// saveHighScore = e => {
+//   e.preventDefault();
+// }
